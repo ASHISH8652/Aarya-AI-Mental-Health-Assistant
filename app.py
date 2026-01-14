@@ -107,6 +107,21 @@ if "language" not in st.session_state:
     st.session_state.language = "English"
 
 # =========================================================
+# 🔹 ADDITION STEP 1: FULL SESSION TRACKING (NEW)
+# =========================================================
+if "full_emotion_log" not in st.session_state:
+    st.session_state.full_emotion_log = []
+
+if "full_sentiment_log" not in st.session_state:
+    st.session_state.full_sentiment_log = []
+
+if "full_confidence_log" not in st.session_state:
+    st.session_state.full_confidence_log = []
+
+if "full_timestamp_log" not in st.session_state:
+    st.session_state.full_timestamp_log = []
+
+# =========================================================
 # 4️⃣ INTRO SCREEN
 # =========================================================
 if not st.session_state.intro_seen:
@@ -147,18 +162,27 @@ if st.sidebar.button("🔄 Reset Session"):
     st.session_state.emotional_state = []
     st.session_state.daily_moods = {}
     st.session_state.negative_count = 0
+    st.session_state.full_emotion_log = []
+    st.session_state.full_sentiment_log = []
+    st.session_state.full_confidence_log = []
+    st.session_state.full_timestamp_log = []
     st.rerun()
 
-if st.session_state.daily_moods:
-    df_download = pd.DataFrame(
-        st.session_state.daily_moods.items(),
-        columns=["Date", "Mood"]
-    )
-    csv = df_download.to_csv(index=False).encode("utf-8")
+# 🔹 ADDITION STEP 5: FULL HISTORY DOWNLOAD
+if st.session_state.full_sentiment_log:
+    full_df = pd.DataFrame({
+        "Timestamp": st.session_state.full_timestamp_log,
+        "Sentiment": st.session_state.full_sentiment_log,
+        "Confidence (%)": st.session_state.full_confidence_log,
+        "Emotion": st.session_state.full_emotion_log
+    })
+
+    csv_full = full_df.to_csv(index=False).encode("utf-8")
+
     st.sidebar.download_button(
-        "⬇️ Download Mood History",
-        csv,
-        "mood_history.csv",
+        "⬇️ Download Full Session History",
+        csv_full,
+        "full_session_history.csv",
         "text/csv"
     )
 
@@ -252,6 +276,14 @@ if user_input:
         f"{e['label']} ({e['score']*100:.1f}%)" for e in emotions
     )
 
+    # 🔹 ADDITION STEP 2: FULL HISTORY APPEND
+    st.session_state.full_sentiment_log.append(sentiment)
+    st.session_state.full_confidence_log.append(confidence)
+    st.session_state.full_emotion_log.append(emotions[0]["label"])
+    st.session_state.full_timestamp_log.append(
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+
     reply = nurse_reply(sentiment, st.session_state.negative_count)
 
     st.session_state.chat_history.append(("You", user_input))
@@ -271,6 +303,13 @@ for role, text in st.session_state.chat_history:
             f"<div class='chat-bubble assistant-bubble'>🩺 <b>Aarya</b><br>{text}</div>",
             unsafe_allow_html=True
         )
+
+# 🔹 ADDITION STEP 3: EMOTION & CONFIDENCE UI
+if user_input:
+    st.markdown(
+        f"<div class='meta'>🧠 {emotion_text} | 🔍 {sentiment} ({confidence}%)</div>",
+        unsafe_allow_html=True
+    )
 
 # =========================================================
 # 1️⃣1️⃣ MOOD ANALYTICS
@@ -293,8 +332,20 @@ if st.session_state.daily_moods:
 
     st.pyplot(fig)
 
-    st.markdown("### 📅 Your Mood Journal")
-    st.dataframe(mood_df, use_container_width=True)
+# 🔹 ADDITION STEP 4: FULL SESSION EMOTION CHART
+if st.session_state.full_emotion_log:
+    st.markdown("### 📊 Full Session Emotion Distribution")
+
+    emotion_series = pd.Series(st.session_state.full_emotion_log)
+    emotion_counts = emotion_series.value_counts()
+
+    fig2, ax2 = plt.subplots()
+    emotion_counts.plot(kind="bar", ax=ax2)
+    ax2.set_xlabel("Emotion")
+    ax2.set_ylabel("Count")
+    ax2.set_title("Emotion Frequency (Entire Session)")
+
+    st.pyplot(fig2)
 
 # =========================================================
 # 🔹 FOOTER
@@ -304,4 +355,3 @@ st.markdown("""
 ⚠️ This AI assistant does not replace professional mental health care.
 </div>
 """, unsafe_allow_html=True)
-

@@ -107,6 +107,24 @@ if "language" not in st.session_state:
     st.session_state.language = "English"
 
 # =========================================================
+# 🔓 CBT MODE SESSION STATE
+# =========================================================
+if "cbt_mode" not in st.session_state:
+    st.session_state.cbt_mode = False
+
+if "cbt_step" not in st.session_state:
+    st.session_state.cbt_step = 0
+
+if "cbt_data" not in st.session_state:
+    st.session_state.cbt_data = {
+        "thought": "",
+        "emotion": "",
+        "behavior": "",
+        "reframe": ""
+    }
+
+
+# =========================================================
 # 🔹 ADDITION STEP 1: FULL SESSION TRACKING (NEW)
 # =========================================================
 if "full_emotion_log" not in st.session_state:
@@ -167,6 +185,23 @@ if st.sidebar.button("🔄 Reset Session"):
     st.session_state.full_confidence_log = []
     st.session_state.full_timestamp_log = []
     st.rerun()
+    st.session_state.cbt_step = 0
+    st.session_state.cbt_data = {
+        "thought": "",
+        "emotion": "",
+        "behavior": "",
+        "reframe": ""
+    }
+    st.session_state.cbt_mode = False
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🧩 Therapy Tools")
+
+st.session_state.cbt_mode = st.sidebar.toggle(
+    "🧠 Enable CBT Therapy Mode",
+    value=st.session_state.cbt_mode
+)
+
 
 # 🔹 ADDITION STEP 5: FULL HISTORY DOWNLOAD
 if st.session_state.full_sentiment_log:
@@ -192,6 +227,9 @@ st.sidebar.markdown("🎤 Voice Chat")
 st.sidebar.markdown("🧩 CBT Therapy")
 st.sidebar.markdown("👤 Secure Login")
 st.sidebar.markdown("☁️ Cloud Sync")
+
+
+
 
 # =========================================================
 # 6️⃣ LOAD MODELS
@@ -288,6 +326,85 @@ if user_input:
 
     st.session_state.chat_history.append(("You", user_input))
     st.session_state.chat_history.append(("Aarya", reply))
+
+# =========================================================
+# 🔓 CBT THERAPY MODE
+# =========================================================
+if st.session_state.cbt_mode:
+    st.markdown("## 🧩 CBT Therapy Session")
+    st.markdown("*A guided, gentle reflection process*")
+
+    # STEP 1 — THOUGHT
+    if st.session_state.cbt_step == 0:
+        thought = st.text_area(
+            "💭 What troubling thought is bothering you right now?"
+        )
+        if st.button("Next ➡️"):
+            st.session_state.cbt_data["thought"] = thought
+            st.session_state.cbt_step = 1
+            st.rerun()
+
+    # STEP 2 — EMOTION
+    elif st.session_state.cbt_step == 1:
+        emotion = st.text_input(
+            "💙 How does this thought make you feel?"
+        )
+        if st.button("Next ➡️"):
+            st.session_state.cbt_data["emotion"] = emotion
+            st.session_state.cbt_step = 2
+            st.rerun()
+
+    # STEP 3 — BEHAVIOR
+    elif st.session_state.cbt_step == 2:
+        behavior = st.text_input(
+            "🔁 What do you usually do when you feel this way?"
+        )
+        if st.button("Next ➡️"):
+            st.session_state.cbt_data["behavior"] = behavior
+            st.session_state.cbt_step = 3
+            st.rerun()
+
+    # STEP 4 — REFRAME
+    elif st.session_state.cbt_step == 3:
+        reframe_text = (
+            f"When you think **'{st.session_state.cbt_data['thought']}'**, "
+            f"it makes you feel **{st.session_state.cbt_data['emotion']}**.\n\n"
+            "Let’s gently reframe this thought:\n\n"
+            "🌱 *Is there a kinder or more balanced way to see this situation?*"
+        )
+
+        st.info(reframe_text)
+
+        reframe = st.text_area(
+            "✨ Write a healthier alternative thought:"
+        )
+
+        if st.button("Finish CBT Session ✅"):
+            st.session_state.cbt_data["reframe"] = reframe
+            st.session_state.cbt_step = 4
+            st.rerun()
+
+    # SUMMARY
+    elif st.session_state.cbt_step == 4:
+        st.success("🩺 CBT Session Summary")
+
+        st.markdown(f"""
+        **💭 Thought:** {st.session_state.cbt_data['thought']}  
+        **💙 Emotion:** {st.session_state.cbt_data['emotion']}  
+        **🔁 Behavior:** {st.session_state.cbt_data['behavior']}  
+        **✨ Reframed Thought:** {st.session_state.cbt_data['reframe']}
+        """)
+
+        if st.button("🔄 Start New CBT Session"):
+            st.session_state.cbt_step = 0
+            st.session_state.cbt_data = {
+                "thought": "",
+                "emotion": "",
+                "behavior": "",
+                "reframe": ""
+            }
+            st.rerun()
+
 
 # =========================================================
 # 🔟 CHAT HISTORY RENDER

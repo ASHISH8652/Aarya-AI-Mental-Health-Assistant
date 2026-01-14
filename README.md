@@ -1,8 +1,18 @@
-# 🧠 Aarya – AI Mental Health Assistant
+# 🩺 Aarya – Your AI Mental Health Assistant
+
+## 🧠 Aarya – AI Mental Health Assistant
 
 Aarya is an **AI-powered mental health assistant** designed to provide empathetic conversation, emotional awareness, and basic mental health guidance using **Natural Language Processing (NLP)** and **Machine Learning**. The application is built with **Python** and deployed using **Streamlit**, offering a clean, human-like interface similar to a digital nurse or mental health companion.
 
-> ⚠️ **Disclaimer:** This application is for educational and supportive purposes only. It is **not a replacement for professional medical advice, diagnosis, or treatment**.
+## 🌱 Overview
+
+**Aarya** is an **AI-powered mental health assistant** designed to provide **calm, empathetic, and emotionally aware conversations**.  
+It acts like a **digital mental-health nurse**, helping users reflect on emotions while promoting safety, awareness, and ethical AI use.
+
+Built using **Python, NLP, and Machine Learning**, and deployed with **Streamlit**, Aarya focuses on **empathy-first design** rather than medical diagnosis.
+
+> ⚠️ **Disclaimer:** This application is for educational and supportive purposes only.
+> It is **not a replacement for professional medical advice, diagnosis, or treatment**.
 
 ---
 
@@ -17,6 +27,10 @@ Aarya is an **AI-powered mental health assistant** designed to provide empatheti
 * 🌙 **Dark UI Theme** – Calm, modern, and user-friendly design
 
 ---
+
+## 🏗️ Project Structure
+
+
 
 ## 🏗️ Project Architecture
 
@@ -90,6 +104,13 @@ http://localhost:8501
 ## 🌐 Deployment
 
 This project is optimized for deployment on **Streamlit Cloud**.
+
+This project is deployed on Streamlit Cloud.
+
+Live App:
+
+https://aarya-ai-mental-health-assistant.streamlit.app/
+
 
 Steps:
 

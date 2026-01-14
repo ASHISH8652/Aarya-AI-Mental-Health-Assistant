@@ -5,6 +5,9 @@ from transformers import pipeline
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
+from gtts import gTTS
+import tempfile
+import os
 
 # =========================================================
 # 1️⃣ PAGE CONFIG (MUST BE FIRST)
@@ -285,6 +288,20 @@ def nurse_reply(sentiment, negative_count):
     return "🙂 I’m listening."
 
 # =========================================================
+# 🔊 NURSE VOICE (TEXT TO SPEECH)
+# =========================================================
+def speak_nurse_voice(text):
+    try:
+        tts = gTTS(text=text, lang="en", slow=True)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+            tts.save(fp.name)
+            return fp.name
+    except Exception:
+        return None
+
+
+# =========================================================
 # 8️⃣ APP HEADER
 # =========================================================
 st.markdown("## 🧠 Aarya – Your AI Mental Health Assistant")
@@ -323,6 +340,13 @@ if user_input:
     )
 
     reply = nurse_reply(sentiment, st.session_state.negative_count)
+    reply = nurse_reply(sentiment, st.session_state.negative_count)
+    voice_file = speak_nurse_voice(reply)
+    # if voice_file:
+    #     audio_bytes = open(voice_file, "rb").read()
+    #     st.audio(audio_bytes, format="audio/mp3")
+    #     os.remove(voice_file)
+
 
     st.session_state.chat_history.append(("You", user_input))
     st.session_state.chat_history.append(("Aarya", reply))
@@ -417,9 +441,14 @@ for role, text in st.session_state.chat_history:
         )
     else:
         st.markdown(
-            f"<div class='chat-bubble assistant-bubble'>🩺 <b>Aarya</b><br>{text}</div>",
-            unsafe_allow_html=True
-        )
+        f"<div class='chat-bubble assistant-bubble'>🩺 <b>Aarya</b><br>{text}</div>",
+        unsafe_allow_html=True
+    )
+
+    if "voice_file" in locals() and voice_file:
+        audio_bytes = open(voice_file, "rb").read()
+        st.audio(audio_bytes, format="audio/mp3")
+
 
 # 🔹 ADDITION STEP 3: EMOTION & CONFIDENCE UI
 if user_input:
@@ -427,6 +456,7 @@ if user_input:
         f"<div class='meta'>🧠 {emotion_text} | 🔍 {sentiment} ({confidence}%)</div>",
         unsafe_allow_html=True
     )
+
 
 # =========================================================
 # 1️⃣1️⃣ MOOD ANALYTICS

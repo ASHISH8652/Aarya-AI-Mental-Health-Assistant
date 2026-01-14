@@ -17,22 +17,17 @@ st.set_page_config(
 )
 
 # =========================================================
-# 2️⃣ GLOBAL CSS (FIXED + FORCE REFRESH)
+# 2️⃣ GLOBAL CSS
 # =========================================================
 st.markdown("""
 <style>
-/* Force fresh render */
-html, body, [class*="css"] {
-    animation: none !important;
-}
+html, body, [class*="css"] { animation: none !important; }
 
-/* App background */
 .stApp {
     background: linear-gradient(135deg, #0f172a, #020617);
     color: #e5e7eb;
 }
 
-/* Chat bubble base */
 .chat-bubble {
     padding: 16px 20px;
     border-radius: 18px;
@@ -42,7 +37,6 @@ html, body, [class*="css"] {
     animation: fadeIn 0.6s ease-in-out;
 }
 
-/* User bubble */
 .user-bubble {
     background: linear-gradient(135deg, #1e40af, #1e3a8a);
     color: white;
@@ -50,7 +44,6 @@ html, body, [class*="css"] {
     border-bottom-right-radius: 6px;
 }
 
-/* Assistant bubble */
 .assistant-bubble {
     background: linear-gradient(135deg, #064e3b, #022c22);
     color: #ecfdf5;
@@ -58,7 +51,6 @@ html, body, [class*="css"] {
     border-bottom-left-radius: 6px;
 }
 
-/* Emergency */
 .emergency {
     background: #7f1d1d;
     color: #fee2e2;
@@ -67,14 +59,12 @@ html, body, [class*="css"] {
     animation: pulse 1.5s infinite;
 }
 
-/* Meta info */
 .meta {
     font-size: 13px;
     opacity: 0.75;
     margin-bottom: 8px;
 }
 
-/* Footer */
 .footer {
     font-size: 12px;
     opacity: 0.6;
@@ -82,7 +72,6 @@ html, body, [class*="css"] {
     margin-top: 40px;
 }
 
-/* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
@@ -102,6 +91,9 @@ html, body, [class*="css"] {
 if "intro_seen" not in st.session_state:
     st.session_state.intro_seen = False
 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 if "emotional_state" not in st.session_state:
     st.session_state.emotional_state = []
 
@@ -115,12 +107,12 @@ if "language" not in st.session_state:
     st.session_state.language = "English"
 
 # =========================================================
-# 4️⃣ INTRO + DISCLAIMER (ONE TIME)
+# 4️⃣ INTRO SCREEN
 # =========================================================
 if not st.session_state.intro_seen:
     st.markdown("""
     <div style="text-align:center; padding:50px;">
-        <h1>🌸 Hello, I’m Aarya</h1>
+        <h1>🩺 Hello, I’m Aarya</h1>
         <p style="font-size:18px;">
         I’m here to listen — calmly, safely, and without judgment.
         </p>
@@ -139,7 +131,7 @@ if not st.session_state.intro_seen:
     st.stop()
 
 # =========================================================
-# 5️⃣ SIDEBAR (UPGRADE READY)
+# 5️⃣ SIDEBAR CONTROLS
 # =========================================================
 st.sidebar.title("🧠 Aarya Control Panel")
 
@@ -149,11 +141,33 @@ st.session_state.language = st.sidebar.selectbox(
 )
 
 st.sidebar.markdown("---")
+
+if st.sidebar.button("🔄 Reset Session"):
+    st.session_state.chat_history = []
+    st.session_state.emotional_state = []
+    st.session_state.daily_moods = {}
+    st.session_state.negative_count = 0
+    st.rerun()
+
+if st.session_state.daily_moods:
+    df_download = pd.DataFrame(
+        st.session_state.daily_moods.items(),
+        columns=["Date", "Mood"]
+    )
+    csv = df_download.to_csv(index=False).encode("utf-8")
+    st.sidebar.download_button(
+        "⬇️ Download Mood History",
+        csv,
+        "mood_history.csv",
+        "text/csv"
+    )
+
+st.sidebar.markdown("---")
 st.sidebar.markdown("### 🔒 Future Upgrades")
-st.sidebar.markdown("🎤 Voice Chat (UI Ready)")
-st.sidebar.markdown("🧩 CBT Therapy Prompts")
+st.sidebar.markdown("🎤 Voice Chat")
+st.sidebar.markdown("🧩 CBT Therapy")
 st.sidebar.markdown("👤 Secure Login")
-st.sidebar.markdown("☁️ Cloud Mood History")
+st.sidebar.markdown("☁️ Cloud Sync")
 
 # =========================================================
 # 6️⃣ LOAD MODELS
@@ -211,7 +225,7 @@ def nurse_reply(sentiment, negative_count):
 # =========================================================
 # 8️⃣ APP HEADER
 # =========================================================
-st.markdown("## 🩺 Aarya – Your AI Mental Health Assistant")
+st.markdown("## 🧠 Aarya – Your AI Mental Health Assistant")
 st.markdown("*A calm, safe space to talk.*")
 
 # =========================================================
@@ -240,50 +254,47 @@ if user_input:
 
     reply = nurse_reply(sentiment, st.session_state.negative_count)
 
-    st.markdown(
-        f"<div class='chat-bubble user-bubble'>👤 <b>You</b><br>{user_input}</div>",
-        unsafe_allow_html=True
-    )
+    st.session_state.chat_history.append(("You", user_input))
+    st.session_state.chat_history.append(("Aarya", reply))
 
-    st.markdown(
-        f"<div class='meta'>🧠 {emotion_text} | 🔍 {sentiment} ({confidence}%)</div>",
-        unsafe_allow_html=True
-    )
-
-    if sentiment == "Emergency":
+# =========================================================
+# 🔟 CHAT HISTORY RENDER
+# =========================================================
+for role, text in st.session_state.chat_history:
+    if role == "You":
         st.markdown(
-            f"<div class='emergency'>🩺 <b>Aarya</b><br>{reply}</div>",
+            f"<div class='chat-bubble user-bubble'>👤 <b>You</b><br>{text}</div>",
             unsafe_allow_html=True
         )
     else:
         st.markdown(
-            f"<div class='chat-bubble assistant-bubble'>🩺 <b>Aarya</b><br>{reply}</div>",
+            f"<div class='chat-bubble assistant-bubble'>🩺 <b>Aarya</b><br>{text}</div>",
             unsafe_allow_html=True
         )
 
 # =========================================================
-# 🔟 MOOD JOURNAL
+# 1️⃣1️⃣ MOOD ANALYTICS
 # =========================================================
-st.markdown("### 📅 Your Mood Journal")
-
 if st.session_state.daily_moods:
+    st.markdown("### 📊 Mood Distribution")
+
     mood_df = pd.DataFrame(
         st.session_state.daily_moods.items(),
         columns=["Date", "Mood"]
     )
-    st.dataframe(mood_df, use_container_width=True)
 
-    if len(mood_df) >= 3:
-        dominant = mood_df["Mood"].value_counts().idxmax()
-        advice = {
-            "Positive": "🌱 You seem emotionally balanced.",
-            "Neutral": "🙂 You’re steady — gentle care helps.",
-            "Negative": "💙 Be kind to yourself.",
-            "Emergency": "🚨 Please seek immediate help."
-        }
-        st.success(f"**Weekly Insight:** {advice[dominant]}")
-else:
-    st.info("Your daily moods will appear here.")
+    mood_counts = mood_df["Mood"].value_counts()
+
+    fig, ax = plt.subplots()
+    mood_counts.plot(kind="bar", ax=ax)
+    ax.set_xlabel("Mood")
+    ax.set_ylabel("Count")
+    ax.set_title("Mood Overview")
+
+    st.pyplot(fig)
+
+    st.markdown("### 📅 Your Mood Journal")
+    st.dataframe(mood_df, use_container_width=True)
 
 # =========================================================
 # 🔹 FOOTER
@@ -293,5 +304,4 @@ st.markdown("""
 ⚠️ This AI assistant does not replace professional mental health care.
 </div>
 """, unsafe_allow_html=True)
-# =========================================================
-# END OF FILE
+

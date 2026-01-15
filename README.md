@@ -144,8 +144,8 @@ These are intentionally locked to keep the current system stable, ethical, and e
 ## 📄 Project Report
 
 📘 Full project report (PDF):  
-👉 Aarya_AI_Mental_Health_Assistant_Full_Project_Report.pdf
-👉 [Download Project Report]("C:\Users\prust\Downloads\Aarya_AI_Mental_Health_Assistant_Full_Project_Report.pdf")
+ 
+👉 [Download Project Report](Aarya_AI_Mental_Health_Assistant_Full_Project_Report.pdf)
 
 
 ## 👨‍💻 Author

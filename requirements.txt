@@ -6,3 +6,4 @@ transformers
 torch
 pickle-mixin
 gTTS
+reportlab

@@ -42,6 +42,7 @@ Aarya-AI-Mental-Health-Assistant/
 ├── tfidf_vectorizer.pkl   # TF-IDF vectorizer
 ├── emotion_chatbot.ipynb  # Development notebook
 ├── README.md              # Documentation
+├── Aarya_Project_Report.pdf   ✅ (upload this)
 ├── LICENSE                # MIT License
 └── .gitignore             # Ignored files
 ```
@@ -139,6 +140,12 @@ These are intentionally locked to keep the current system stable, ethical, and e
 * Clean system architecture
 * Scalable upgrade roadmap
 * Fully working deployed application
+---
+## 📄 Project Report
+
+📘 **College Project Report (PDF):**  
+👉 [Download Project Report](Aarya_Project_Report.pdf)
+
 
 ## 👨‍💻 Author
 

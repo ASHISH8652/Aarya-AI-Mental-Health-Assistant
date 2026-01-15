@@ -109,6 +109,10 @@ if "daily_moods" not in st.session_state:
 if "language" not in st.session_state:
     st.session_state.language = "English"
 
+if "emotion_timeline" not in st.session_state:
+    st.session_state.emotion_timeline = []
+
+
 # =========================================================
 # 🔓 CBT MODE SESSION STATE
 # =========================================================
@@ -287,6 +291,8 @@ def nurse_reply(sentiment, negative_count):
         return "😊 I’m glad to hear that. What helped today?"
     return "🙂 I’m listening."
 
+
+
 # =========================================================
 # 🔊 NURSE VOICE (TEXT TO SPEECH)
 # =========================================================
@@ -300,6 +306,27 @@ def speak_nurse_voice(text):
     except Exception:
         return None
 
+# =========================================================
+# 🧠 EMOTIONAL TREND ANALYZER
+# =========================================================
+def generate_emotional_insight(timeline):
+    if len(timeline) < 3:
+        return "🌱 Share a little more — I’ll understand your emotional pattern better."
+
+    sentiments = [t["sentiment"] for t in timeline]
+
+    positive = sentiments.count("Positive")
+    negative = sentiments.count("Negative")
+    neutral = sentiments.count("Neutral")
+
+    if negative >= positive and negative >= neutral:
+        return "💙 You’ve been feeling low frequently. Gentle care and rest may help."
+    if positive > negative:
+        return "🌸 Your emotional state shows improvement. Keep nurturing what helps you."
+    if neutral >= positive and neutral >= negative:
+        return "🙂 You seem emotionally steady. Consistency is a strength."
+
+    return "🫂 I’m here with you, whatever you’re feeling."
 
 # =========================================================
 # 8️⃣ APP HEADER
@@ -322,6 +349,9 @@ if user_input:
     st.session_state.daily_moods[today] = sentiment
 
     st.session_state.emotional_state.append(sentiment)
+    st.session_state.emotion_timeline.append({
+    "time": datetime.datetime.now().strftime("%H:%M:%S"),
+    "sentiment": sentiment })
     st.session_state.negative_count = (
         st.session_state.negative_count + 1 if sentiment == "Negative" else 0
     )
@@ -493,6 +523,19 @@ if st.session_state.full_emotion_log:
     ax2.set_title("Emotion Frequency (Entire Session)")
 
     st.pyplot(fig2)
+
+# =========================================================
+# 🧠 AI EMOTIONAL INSIGHT
+# =========================================================
+if st.session_state.emotion_timeline:
+    st.markdown("### 🧠 Emotional Insight")
+
+    insight = generate_emotional_insight(
+        st.session_state.emotion_timeline
+    )
+
+    st.info(insight)
+
 
 # =========================================================
 # 🔹 FOOTER

@@ -101,7 +101,8 @@ This project is optimized for deployment on **Streamlit Cloud**.
 This project is deployed on Streamlit Cloud.
 
 ### 🔗 Live App:
-https://aarya-ai-mental-health-assistant.streamlit.app/
+[https://aarya-ai-mental-health-assistant.streamlit.app/](https://aarya-ai-mental-health-assistant-f7s9peoazxhnenakfr7lks.streamlit.app/
+)
 
 ### Deployment Steps:
 

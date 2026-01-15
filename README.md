@@ -107,7 +107,8 @@ This project is deployed on Streamlit Cloud.
 ### Deployment Steps:
 
 1. Push code to GitHub
-2. Go to [[https://share.streamlit.io](https://share.streamlit.io](https://share.streamlit.io/?utm_source=streamlit&utm_medium=referral&utm_campaign=main&utm_content=-ss-streamlit-io-topright))
+2. Go to  [https://share.streamlit.io](https://share.streamlit.io)
+
 3. Connect GitHub repository
 4. Select `app.py` as the main file
 5. Deploy 🎉

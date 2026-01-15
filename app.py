@@ -1,3 +1,8 @@
+# app.py
+# Aarya – AI Mental Health Assistant
+# Developed by OpenAI ChatGPT
+# =========================================================
+# import necessary libraries
 import streamlit as st
 import pickle
 import re
@@ -8,7 +13,59 @@ import datetime
 from gtts import gTTS
 import tempfile
 import os
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+import io
+from io import BytesIO
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
+from reportlab.lib.styles import getSampleStyleSheet
 
+# =========================================================
+# 📄 PDF SESSION REPORT GENERATOR
+def generate_pdf_report(chat_history, mood_df, insight_text):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = []
+
+    # ---------------- Title ----------------
+    story.append(Paragraph("<b>Aarya – Full Session Emotional Report</b>", styles["Title"]))
+    story.append(Spacer(1, 12))
+
+    # ---------------- Chat History ----------------
+    story.append(Paragraph("<b>Chat History</b>", styles["Heading2"]))
+    story.append(Spacer(1, 8))
+
+    for role, message in chat_history:
+        story.append(Paragraph(f"<b>{role}:</b> {message}", styles["Normal"]))
+        story.append(Spacer(1, 6))
+
+    story.append(Spacer(1, 12))
+
+    # ---------------- Mood Timeline ----------------
+    if not mood_df.empty:
+        story.append(Paragraph("<b>Daily Mood Timeline</b>", styles["Heading2"]))
+        story.append(Spacer(1, 8))
+
+        table_data = [["Date", "Mood"]]
+        for _, row in mood_df.iterrows():
+            table_data.append([str(row["Date"]), row["Mood"]])
+
+        table = Table(table_data, hAlign="LEFT")
+        story.append(table)
+
+    story.append(Spacer(1, 12))
+
+    # ---------------- Emotional Insight ----------------
+    story.append(Paragraph("<b>AI Emotional Insight</b>", styles["Heading2"]))
+    story.append(Spacer(1, 8))
+    story.append(Paragraph(insight_text, styles["Normal"]))
+
+    # Build PDF
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
 # =========================================================
 # 1️⃣ PAGE CONFIG (MUST BE FIRST)
 # =========================================================
@@ -525,6 +582,33 @@ if st.session_state.full_emotion_log:
     st.pyplot(fig2)
 
 # =========================================================
+# 📥 DOWNLOAD SESSION REPORT
+# =========================================================
+if st.session_state.chat_history and st.session_state.daily_moods:
+    mood_df = pd.DataFrame(
+        st.session_state.daily_moods.items(),
+        columns=["Date", "Mood"]
+    )
+
+    insight_text = generate_emotional_insight(
+        st.session_state.emotion_timeline
+    )
+
+    pdf_file = generate_pdf_report(
+        st.session_state.chat_history,
+        mood_df,
+        insight_text
+    )
+
+    st.download_button(
+        "📄 Download Full Session Report (PDF)",
+        pdf_file,
+        file_name="aarya_session_report.pdf",
+        mime="application/pdf"
+    )
+
+
+# =========================================================
 # 🧠 AI EMOTIONAL INSIGHT
 # =========================================================
 if st.session_state.emotion_timeline:
@@ -536,6 +620,71 @@ if st.session_state.emotion_timeline:
 
     st.info(insight)
 
+# =========================================================
+# 📄 PDF SESSION REPORT GENERATOR
+# =========================================================
+def generate_pdf_report(chat_history, mood_df, insight_text):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    y = height - 40
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(40, y, "Aarya – Mental Health Session Report")
+
+    y -= 30
+    c.setFont("Helvetica", 10)
+    c.drawString(40, y, f"Date: {datetime.date.today().isoformat()}")
+
+    y -= 30
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(40, y, "Chat History")
+
+    y -= 20
+    c.setFont("Helvetica", 10)
+
+    for role, text in chat_history:
+        if y < 60:
+            c.showPage()
+            y = height - 40
+            c.setFont("Helvetica", 10)
+        c.drawString(50, y, f"{role}: {text}")
+        y -= 15
+
+    y -= 20
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(40, y, "Mood Summary")
+
+    y -= 20
+    c.setFont("Helvetica", 10)
+
+    for _, row in mood_df.iterrows():
+        c.drawString(50, y, f"{row['Date']} → {row['Mood']}")
+        y -= 15
+
+    y -= 20
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(40, y, "AI Emotional Insight")
+
+    y -= 20
+    c.setFont("Helvetica", 10)
+    c.drawString(50, y, insight_text)
+
+    c.save()
+    buffer.seek(0)
+    return buffer
+if st.button("📄 Download Session Report (PDF)"):
+    pdf_buffer = generate_pdf_report(
+        st.session_state.chat_history,
+        mood_df,
+        insight
+    )
+    st.download_button(
+        label="Download PDF Report",
+        data=pdf_buffer,
+        file_name="mental_health_session_report.pdf",
+        mime="application/pdf"
+    )
 
 # =========================================================
 # 🔹 FOOTER
@@ -543,5 +692,5 @@ if st.session_state.emotion_timeline:
 st.markdown("""
 <div class='footer'>
 ⚠️ This AI assistant does not replace professional mental health care.
-</div>
+            </div>
 """, unsafe_allow_html=True)

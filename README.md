@@ -109,7 +109,6 @@ This project is deployed on Streamlit Cloud.
 
 1. Push code to GitHub
 2. Go to  [https://share.streamlit.io](https://share.streamlit.io)
-
 3. Connect GitHub repository
 4. Select `app.py` as the main file
 5. Deploy 🎉
@@ -145,7 +144,8 @@ These are intentionally locked to keep the current system stable, ethical, and e
 
 📘 Full project report (PDF):  
  
-👉 [Download Project Report](Aarya_AI_Mental_Health_Assistant_Full_Project_Report.pdf)
+👉 [Download Project Report]
+**[Aarya_AI_Mental_Health_Assistant_Full_Project_Report.pdf](https://github.com/ASHISH8652/Aarya-AI-Mental-Health-Assistant/blob/main/Aarya_AI_Mental_Health_Assistant_Full_Project_Report.pdf)**
 
 
 ## 👨‍💻 Author
